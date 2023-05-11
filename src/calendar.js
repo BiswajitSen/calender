@@ -8,15 +8,15 @@ class Month {
   constructor(month, year) {
     this.#month = month;
     this.#year = year;
-  }
+  };
 
   #firstDay() {
     return new Date(this.#year, this.#month - 1).getDay();
-  }
+  };
 
   #totalDaysInMonth() {
     return 32 - new Date(this.#year, this.#month - 1, 32).getDate();
-  }
+  };
 
   #days() {
     const totalDays = this.#totalDaysInMonth();
@@ -25,20 +25,20 @@ class Month {
     });
 
     return days;
-  }
+  };
 
   #header() {
     const month = months[this.#month - 1];
     return `${month} ${this.#year}`;
-  }
+  };
 
   #weekDays() {
     return Object.values(days).join(' ');
-  }
+  };
 
   #leadingSpaces() {
     return ' '.repeat(this.#firstDay() * 3);
-  }
+  };
 
   #addDays(monthPage) {
     let nextDay = this.#firstDay();
@@ -54,7 +54,7 @@ class Month {
 
       return monthPage;
     }, monthPage);
-  }
+  };
 
   renderMonth() {
     let monthPage = `\t${this.#header()}\n`;
@@ -63,7 +63,7 @@ class Month {
     monthPage = this.#addDays(monthPage);
 
     return monthPage;
-  }
+  };
 
 }
 
