@@ -2,71 +2,67 @@ const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', '
 const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 class Month {
-  #month
-  #year
+  #month;
+  #year;
 
   constructor(month, year) {
     this.#month = month;
     this.#year = year;
-  };
+  }
 
-  #startingDateOfMonth() {
-    return new Date(this.#year, this.#month - 1, 1);
-  };
+  #firstDay() {
+    return new Date(this.#year, this.#month - 1).getDay();
+  }
 
-  #createCalendarMonth() {
-    const calendarMonth = [];
-    const date = this.#startingDateOfMonth();
-
-    const currentMonth = date.getMonth();
-    const nextDate = date;
-
-    while (nextDate.getMonth() === currentMonth) {
-      calendarMonth.push(nextDate.getDay());
-      nextDate.setDate(nextDate.getDate() + 1);
-    }
-
-    return calendarMonth;
-  };
+  #totalDaysInMonth() {
+    return 32 - new Date(this.#year, this.#month - 1, 32).getDate();
+  }
 
   #days() {
+    const totalDays = this.#totalDaysInMonth();
+    const days = new Array(totalDays).fill().map(function (_, index) {
+      return index + 1;
+    });
+
+    return days;
+  }
+
+  #header() {
+    const month = months[this.#month - 1];
+    return `${month} ${this.#year}`;
+  }
+
+  #weekDays() {
     return Object.values(days).join(' ');
-  };
+  }
 
-  #createHeader() {
-    const month = this.#month - 1;
-    let header = `\t${months[month]} ${this.#year}\n `;
-    header += this.#days() + '\n';
+  #leadingSpaces() {
+    return ' '.repeat(this.#firstDay() * 3);
+  }
 
-    return header;
-  };
+  #addDays(monthPage) {
+    let nextDay = this.#firstDay();
 
-  #addLeadingSpace(count) {
-    const leadingSpaces = count * 3;
-    return ' '.repeat(leadingSpaces);
-  };
+    return this.#days().reduce(function (monthPage, day) {
+      const today = days[(nextDay) % 7];
+      monthPage += (day + '').padStart(2).padEnd(3);
 
-  #dateSheet(calendarMonthData) {
-    let nextDate = 0;
-
-    return calendarMonthData.reduce(function (acc, curr) {
-      if (curr === 0) {
-        acc += '\n';
+      if (today === 'Sa') {
+        monthPage += '\n';
       }
-      nextDate++;
-      return acc + (' ' + nextDate).padStart(2).padEnd(3);
-    }, ' ');
-  };
+      nextDay++;
 
+      return monthPage;
+    }, monthPage);
+  }
 
   renderMonth() {
-    const calendarMonthData = this.#createCalendarMonth();
-    const spaces = calendarMonthData[0];
-    let calendarMonth = this.#createHeader();
-    calendarMonth += this.#addLeadingSpace(spaces);
-    calendarMonth += this.#dateSheet(calendarMonthData);
+    let monthPage = `\t${this.#header()}\n`;
+    monthPage += this.#weekDays() + '\n';
+    monthPage += this.#leadingSpaces();
+    monthPage = this.#addDays(monthPage);
 
-    return calendarMonth;
+    return monthPage;
   }
 
 }
