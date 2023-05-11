@@ -1,95 +1,74 @@
-const { validateHeaderName } = require("http");
+const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
-const months = {
-  1: 'JAN',
-  2: 'FEB',
-  3: 'MAR',
-  4: 'APR',
-  5: 'MAY',
-  6: 'JUNE',
-  7: 'JULY',
-  8: 'AUG',
-  9: 'SEPT',
-  10: 'OCT',
-  11: 'NOV',
-  12: 'DEC'
-};
+class Month {
+  #month
+  #year
 
-const days = {
-  0: 'Su',
-  1: 'Mo',
-  2: 'Tu',
-  3: 'We',
-  4: 'Th',
-  5: 'Fr',
-  6: 'Sa'
-};
-
-class Calendar {
-  #date;
-  #currentMonth() {
-    const month = this.#date.getMonth();
-    return months[month];
+  constructor(month, year) {
+    this.#month = month;
+    this.#year = year;
   };
 
-  #currentYear() {
-    return this.#date.getFullYear();
+  #startingDateOfMonth() {
+    return new Date(this.#year, this.#month - 1, 1);
   };
 
-  constructor(date) {
-    this.#date = date;
-  };
+  #createCalendarMonth() {
+    const calendarMonth = [];
+    const date = this.#startingDateOfMonth();
 
-  #createHeader() {
-    let header = `\t${this.#currentMonth()} `;
-    header += this.#currentYear();
+    const currentMonth = date.getMonth();
+    const nextDate = date;
 
-    return header;
+    while (nextDate.getMonth() === currentMonth) {
+      calendarMonth.push(nextDate.getDay());
+      nextDate.setDate(nextDate.getDate() + 1);
+    }
+
+    return calendarMonth;
   };
 
   #days() {
     return Object.values(days).join(' ');
   };
 
-  #getStartingDay() {
-    const _tmp = new Date();
-    const firstDay = new Date(_tmp.setUTCDate(1)).getDay();
-    return days[firstDay];
+  #createHeader() {
+    const month = this.#month - 1;
+    let header = `\t${months[month]} ${this.#year}\n `;
+    header += this.#days() + '\n';
+
+    return header;
   };
 
-  #toString(value) {
-    return value + '';
+  #addLeadingSpace(count) {
+    const leadingSpaces = count * 3;
+    return ' '.repeat(leadingSpaces);
   };
 
-  #dateTable() {
-    const dayTable = new Array(31);
-    dayTable.push('\n');
-    const firstDayOfMonth = this.#getStartingDay();
-    let day = 0;
-    const newLine = '\n';
-    while (days[day] !== firstDayOfMonth) {
-      console.log(days[day], firstDayOfMonth);
-      dayTable.push('  ');
-      day++;
-    }
+  #dateSheet(calendarMonthData) {
+    let nextDate = 0;
 
-    for (let i = 1; i <= 30; i++, day++) {
-      if (day % 7 === 0) {
-        dayTable.push(newLine);
+    return calendarMonthData.reduce(function (acc, curr) {
+      if (curr === 0) {
+        acc += '\n';
       }
-      const currentDay = this.#toString(i);
-      dayTable.push(currentDay.padStart(Math.max(2, currentDay.length)));
-    }
-
-    return dayTable.join(' ');
+      nextDate++;
+      return acc + (' ' + nextDate).padStart(2).padEnd(3);
+    }, ' ');
   };
 
-  renderCalendar() {
-    let calendar = this.#createHeader() + '\n ';
-    calendar += this.#days();
-    calendar += this.#dateTable();
-    return calendar;
-  };
+
+  renderMonth() {
+    const calendarMonthData = this.#createCalendarMonth();
+    const spaces = calendarMonthData[0];
+    let calendarMonth = this.#createHeader();
+    calendarMonth += this.#addLeadingSpace(spaces);
+    calendarMonth += this.#dateSheet(calendarMonthData);
+
+    return calendarMonth;
+  }
+
 }
 
-exports.Calendar = Calendar;
+exports.Month = Month;
