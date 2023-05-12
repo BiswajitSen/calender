@@ -40,20 +40,35 @@ class Month {
     return ' '.repeat(this.#firstDay() * 3);
   };
 
+  #isSunday(day) {
+    const date = new Date(this.#year, this.#month - 1, day);
+    return date.getDay() === 0;
+  }
+
+  #weekToString(week) {
+    return week.map(function (day) {
+      return day.toString().padStart(2);
+    }).join(' ');
+  };
+
+  #weeksAsStr(weeks) {
+    return weeks.map(this.#weekToString).join('\n');
+  }
+
   #addDays(monthPage) {
     let nextDay = this.#firstDay();
 
-    return this.#days().reduce(function (monthPage, day) {
-      const today = days[(nextDay) % 7];
-      monthPage += (day + '').padStart(2).padEnd(3);
-
-      if (today === 'Sa') {
-        monthPage += '\n';
+    const self = this;
+    const weeks = this.#days().reduce(function (week, day) {
+      if (self.#isSunday(day)) {
+        week.push([]);
       }
-      nextDay++;
+      const currentWeek = week[week.length - 1];
+      currentWeek.push(day);
+      return week;
+    }, [[]]);
 
-      return monthPage;
-    }, monthPage);
+    return monthPage + this.#weeksAsStr(weeks);
   };
 
   renderMonth() {
